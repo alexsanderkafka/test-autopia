@@ -1,4 +1,6 @@
 import { Search, Filter, Heart, LogOut } from "lucide-react";
+import { useState } from "react";
+import PokemonDetailsModal from "../components/PokemonDetailsModal";
 
 export interface Pokemon {
   id: number;
@@ -15,6 +17,9 @@ export interface Pokemon {
 }
 
 function Home(){
+
+    const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+
     const mockPokemons: Pokemon[] = [
         {
             id: 1,
@@ -113,7 +118,6 @@ function Home(){
 
     return(
         <div className="min-h-screen bg-[#9bbc0f]">
-            {/*HEADER*/}
             <div className="bg-[#8bac0f] border-b-8 border-[#0f380f] shadow-[0_8px_0px_0px_rgba(15,56,15,0.3)]">
                 <div className="container mx-auto px-4 py-6">
                     <div className="flex justify-between items-center mb-6">
@@ -151,14 +155,15 @@ function Home(){
                     </div>
                 </div>
             </div>
-
-            {/*GRID*/}
+            
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {
                         mockPokemons.map((pokemon: Pokemon) => (
                             <div className="bg-[#9bbc0f] border-4 border-[#0f380f] rounded-lg p-4 shadow-[4px_4px_0px_0px_rgba(15,56,15,0.3)] hover:shadow-[6px_6px_0px_0px_rgba(15,56,15,0.5)] transition-all cursor-pointer"
-                            onClick={() => {}}
+                            onClick={() => {
+                                setSelectedPokemon(pokemon);
+                            }}
                             key={pokemon.id}>
                                 <div className="flex justify-between items-center mb-4">
                                     <span className="pixel-font text-xs text-[#0f380f]">#{pokemon.id.toString().padStart(3, '0')}</span>
@@ -203,6 +208,13 @@ function Home(){
                     }
                 </div>
             </div>
+
+            {selectedPokemon && (
+                <PokemonDetailsModal
+                pokemon={selectedPokemon}
+                onClose={() => setSelectedPokemon(null)}
+                />
+            )}
         </div>
     );
 }
