@@ -1,11 +1,25 @@
 import "reflect-metadata";
-import { Get, JsonController, Res } from "routing-controllers";
+import { Body, Get, JsonController, Post, Res } from "routing-controllers";
+import type UserRequestDTO from "../dto/UserRequestDTO";
+import AuthService from "../service/AuthService";
 
 @JsonController("/auth")
 export default class AuthControllers{
 
-    @Get("/login")
-    public async login(@Res() res: any){
-        return res.status(200).json({message: "Login successful"});
+    private authService: AuthService = new AuthService();
+
+    @Post("/login")
+    public async login(@Body({validate: false}) body: UserRequestDTO, @Res() res: any): Promise<any>{
+
+        const result = await this.authService.login(body);
+
+        return res.status(200).json(result);
+    }
+
+    @Post("/register")
+    public async register(@Body({validate: false}) body: UserRequestDTO, @Res() res: any): Promise<any>{
+        await this.authService.register(body);
+
+        return res.status(201).json({message: "User registered successfully"});
     }
 }
