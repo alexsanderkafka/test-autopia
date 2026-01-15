@@ -34,7 +34,8 @@ export default class PokemonService{
                     stats: details.data.stats.map((stat: any) => ({
                         name: stat.stat.name,
                         value: stat.base_stat
-                    }))
+                    })),
+                    isFavorite: false
                 }
             })
         );
@@ -42,7 +43,7 @@ export default class PokemonService{
         const total: number = response.data.count;
         const totalPages: number = Math.ceil(total / limit);
         const nextPage: number = Number(page) < totalPages ? Number(page) + 1 : totalPages;
-        const prevPage: number = page > 1 ? page - 1 : 0;
+        const prevPage: number = page > 1 ? page - 1 : 1;
 
         return {
             data: dtoList,
@@ -68,7 +69,8 @@ export default class PokemonService{
             stats: currentPokemon.data.stats.map((stat: any) => ({
                 name: stat.stat.name,
                 value: stat.base_stat
-            }))
+            })),
+            isFavorite: false
         }
 
         return dto;
@@ -98,14 +100,15 @@ export default class PokemonService{
                     stats: details.data.stats.map((stat: any) => ({
                         name: stat.stat.name,
                         value: stat.base_stat
-                    }))
+                    })),
+                    isFavorite: false
                 }
             })
         );
 
         const totalPages: number = Math.ceil(total / limit);
         const nextPage: number = Number(page) < totalPages ? Number(page) + 1 : totalPages;
-        const prevPage: number = page > 1 ? page - 1 : 0;
+        const prevPage: number = page > 1 ? page - 1 : 1;
 
         return {
             data: dtoList,
@@ -144,7 +147,8 @@ export default class PokemonService{
             stats: favorite.stats.map((stat: any) => ({
                 name: stat.stat.name,
                 value: stat.stat.value
-            }))
+            })),
+            isFavorite: false
         }));
 
         return dtoList;

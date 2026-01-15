@@ -2,6 +2,7 @@ import { Search, Filter, Heart, LogOut, ChevronRight, ChevronLeft } from "lucide
 import { useState, useEffect} from "react";
 import PokemonDetailsModal from "../components/PokemonDetailsModal";
 import { pokemonApi } from "../api";
+import { Blocks, RotatingLines } from "react-loader-spinner";
 
 export interface Stat{
     name: string,
@@ -14,54 +15,85 @@ export interface Pokemon {
     types: string[];
     imageUrl: string;
     stats: Stat[];
+    isFavorite: boolean;
 }
 
 function Home(){
 
     const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-    const [pokemons, setPokemons] = useState<Pokemon[] | null>(null);
+
+    const [pokemons, setPokemons] = useState<Pokemon[] | null >(null);
     const [token, setToken] = useState<string>("");
-    const [nextPage, setNextPage] = useState<number>(1);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [prevPage, setPrevPage] = useState<number>(1);
-    const [totalPage, setTotalPage] = useState<number>();
-    const [loading, setLoading] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [totalPage, setTotalPage] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const [search, setSearch] = useState<string>("");
+    const [filter, setFilter] = useState<string>("all")
     
 
     useEffect(() => {
         const tokenJwt: string = localStorage.getItem("token") || "";
+        findAllPokemons(currentPage + 1);
         setToken(tokenJwt);
     }, []);
 
-    useEffect(() => {
-        pokemonApi.get(`pokemon/all?page=${nextPage}`, {
+    function navigationPage(page: number){
+
+        if(filter !== "all"){
+            filterAllPokemon(page, filter);
+        }else{
+            findAllPokemons(page);
+        }
+    }
+
+    function filterAllPokemon(page: number, type: string){
+        pokemonApi.get(`pokemon/filter/${type}?page=${page}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }).then((response: any) => {
+            console.log("dentro do filter")
             console.log(response.data.data);
             setPokemons(response.data.data);    
-            setNextPage(response.data.nextPage);
-            setPrevPage(response.data.prevPage);
             setCurrentPage(response.data.page);
             setTotalPage(response.data.totalPages);
         }).catch((error: any) => {
             console.log(error);
         });
-    }, [token]);
+    }
 
-    function navigationPage(page: number){
+    function findAllPokemons(page: number){
+        console.log(2);
         pokemonApi.get(`pokemon/all?page=${page}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }).then((response: any) => {
             console.log(response.data.data);
-            setPokemons(response.data.data);    
-            setNextPage(response.data.nextPage);
-            setPrevPage(response.data.prevPage);
+            setPokemons(response.data.data);
             setCurrentPage(response.data.page);
             setTotalPage(response.data.totalPages);
+            setLoading(false);
+        }).catch((error: any) => {
+            console.log(error);
+        });
+    }
+
+    
+    function handlerSearch(){
+        console.log(search);
+
+        pokemonApi.get(`pokemon/${search}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then((response: any) => {
+            console.log(response.data);
+
+            setPokemons(Array.isArray(response.data) ? response.data : [response.data]);
+            setCurrentPage(0);
+            setTotalPage(0);
         }).catch((error: any) => {
             console.log(error);
         });
@@ -88,6 +120,28 @@ function Home(){
         fairy: "#EE99AC"
     };
 
+    const types: string[] = [
+        "all",
+        "normal",
+        "fire",
+        "water",
+        "electric",
+        "grass",
+        "ice",
+        "fighting",
+        "poison",
+        "ground",
+        "flying",
+        "psychic",
+        "bug",
+        "rock",
+        "ghost",
+        "dragon",
+        "dark",
+        "steel",
+        "fairy"
+    ]
+
     return(
         <div className="min-h-screen bg-[#9bbc0f]">
             <div className="bg-[#8bac0f] border-b-8 border-[#0f380f] shadow-[0_8px_0px_0px_rgba(15,56,15,0.3)]">
@@ -111,24 +165,53 @@ function Home(){
 
                     <div className="flex gap-2">
                         <div className="pixel-font relative w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f380f]" />
+                            <button
+                            onClick={handlerSearch}
+                            >
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f380f] hover:text-[#8bac0f] transition-colors duration-300" />
+                            </button>
                             <input 
                             type="text"
                             placeholder="Buscar pokémon..."
                             className="w-full pl-10 bg-[#9bbc0f] border-4 border-[#0f380f] rounded-lg text-[#0f380f] placeholder:text-[#0f380f]/50 h-12"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handlerSearch();
+                                }
+                            }}      
                             />
                         </div>
 
-                        <select className="appearance-none pixel-font bg-[#9bbc0f] border-4 border-[#0f380f] rounded-lg text-[#0f380f] px-4">
-                            <option value="">Fogo</option>
-                            <option value="">Água</option>
-                            <option value="">Planta</option>
+                        <select className="appearance-none pixel-font bg-[#9bbc0f] border-4 border-[#0f380f] rounded-lg text-[#0f380f] px-4"
+                        onChange={(e) => {
+                            const selectedType = e.target.value;
+
+                            setFilter(selectedType)
+
+                            if(e.target.value !== "all"){
+                                filterAllPokemon(1, selectedType);
+                            }else{
+                                findAllPokemons(1);
+                            }
+                        }}
+                        value={filter}
+                        >
+                            {
+                                types.map((type: string) => (
+                                    <option key={type} value={type}>
+                                        {type.toUpperCase()}
+                                    </option>
+                                ))
+                            }
                         </select>
                     </div>
                 </div>
             </div>
             
             <div className="container mx-auto px-4 py-8">
+                {!loading ?
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {pokemons &&
                         pokemons.map((pokemon: Pokemon) => (
@@ -137,16 +220,7 @@ function Home(){
                                 setSelectedPokemon(pokemon);
                             }}
                             key={pokemon.pokemonId}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="pixel-font text-xs text-[#0f380f]">#{pokemon.pokemonId.toString().padStart(3, '0')}</span>
-
-                                    <button
-                                    onClick={() => {}}
-                                    className="hover:bg-[#8bac0f] rounded-full p-1 transition-colors duration-300"
-                                    >
-                                        <Heart className="h-5 w-5 text-[#0f380f] pixel-font m-2"/>
-                                    </button>
-                                </div>
+                                <span className="pixel-font text-xs text-[#0f380f] mb-4">#{pokemon.pokemonId.toString().padStart(3, '0')}</span>
 
                                 <div className="bg-[#8bac0f] border-2 border-[#0f380f] rounded p-2 mb-3 aspect-square flex items-center justify-center">
                                     <img 
@@ -178,39 +252,61 @@ function Home(){
                             </div>
                         ))
                     }
+                </div> :
+                <div>
+                    <RotatingLines
+                    visible={true}
+                    height="96"
+                    width="96"
+                    color="#0f380f"
+                    strokeWidth="5"
+                    animationDuration="0.75"
+                    ariaLabel="rotating-lines-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    />
                 </div>
+                }
             </div>
 
             {selectedPokemon && (
                 <PokemonDetailsModal
                 pokemon={selectedPokemon}
                 onClose={() => setSelectedPokemon(null)}
+                tokenJwt={token}
                 />
             )}
 
-            <div className="container mx-auto px-4 py-4 flex justify-center">
-                <div className="flex items-center gap-4">
-                    <button
-                    onClick={() => {
-                        navigationPage(prevPage);
-                    }}
-                    className="bg-[#306230] hover:bg-[#0f380f] text-[#9bbc0f] border-4 border-[#0f380f] pixel-font text-xs"
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <span className="text-[#0f380f] pixel-font">
-                        Página {currentPage} de {totalPage}
-                    </span>
-                    <button
-                    onClick={() => {
-                        navigationPage(nextPage);
-                    }}
-                    className="bg-[#306230] hover:bg-[#0f380f] text-[#9bbc0f] border-4 border-[#0f380f] pixel-font text-xs"
-                    >
-                        <ChevronRight className="h-4 w-4"  />
-                    </button>
+            {
+                totalPage > 1 &&
+                <div className="container mx-auto px-4 py-4 flex justify-center">
+                    <div className="flex items-center gap-4">
+                        <button
+                        onClick={() => {
+                            if(currentPage > 0){
+                                navigationPage(currentPage - 1);
+                            }
+                        }}
+                        className="bg-[#306230] hover:bg-[#0f380f] text-[#9bbc0f] border-4 border-[#0f380f] pixel-font text-xs"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <span className="text-[#0f380f] pixel-font">
+                            Página {currentPage} de {totalPage}
+                        </span>
+                        <button
+                        onClick={() => {
+                            if(currentPage < totalPage){
+                                navigationPage(currentPage + 1);
+                            }
+                        }}
+                        className="bg-[#306230] hover:bg-[#0f380f] text-[#9bbc0f] border-4 border-[#0f380f] pixel-font text-xs"
+                        >
+                            <ChevronRight className="h-4 w-4"  />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     );
 }

@@ -24,8 +24,10 @@ function Login() {
 
     pokemonApi.post("auth/login", data).then((response: any) => {
       const tokenJwt: string = response.data.accessToken;
+      const userExternalId: string = response.data.userExternalId;
 
       localStorage.setItem("token", tokenJwt);
+      localStorage.setItem("userExternalId", userExternalId);
 
       navigate("/home");
     }).catch((error: any) => {

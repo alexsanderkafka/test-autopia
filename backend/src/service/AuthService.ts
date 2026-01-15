@@ -27,6 +27,8 @@ export default class AuthService{
         const refreshToken = TokenJWT.generateRefreshToken(user.email);
 
         const tokenDto: TokenResponseDTO = {
+            userExternalId: user.externalId,
+            email: user.email,
             authenticated: true,
             accessToken: jwt,
             refreshToken: refreshToken
