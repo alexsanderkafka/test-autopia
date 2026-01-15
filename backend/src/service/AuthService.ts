@@ -1,8 +1,8 @@
 import type TokenResponseDTO from "../dto/TokenResponseDTO";
 import type UserRequestDTO from "../dto/UserRequestDTO";
-import ExistingUserError from "../err/ExistingUserError";
+import ExistingEntityError from "../err/ExistingEntityError";
 import InvalidPasswordError from "../err/InvalidPasswordError";
-import NotFoundEntityError from "../err/NotFoundEntityError";
+import NotFoundEntityError from "../err/NotFoundError";
 import UserRepository from "../repository/UserRepository";
 import PasswordEncoder from "../security/PasswordEncoder";
 import TokenJWT from "../security/TokenJWT";
@@ -39,7 +39,7 @@ export default class AuthService{
         const user: any = await this.userRepository.findUserByEmail(body.email);
 
         if(user){
-            throw new ExistingUserError("User already exists");
+            throw new ExistingEntityError("User already exists");
         }
 
         body.password = await PasswordEncoder.encode(body.password);

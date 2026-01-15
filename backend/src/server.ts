@@ -2,12 +2,13 @@ import 'dotenv/config';
 import { createExpressServer } from 'routing-controllers';
 import express from 'express';
 import AuthControllers from './controllers/AuthControllers';
+import PokemonController from './controllers/PokemonController';
 
 const app: any = createExpressServer({
   //cors: true,
   routePrefix: '/api',
   //middlewares: [],
-  controllers: [AuthControllers],
+  controllers: [AuthControllers, PokemonController],
   classTransformer: true,
 });
 
