@@ -46,7 +46,7 @@ model FavoriteType {
   favoriteId Int
   typeId     Int
 
-  favorite FavoritePokemon @relation(fields: [favoriteId], references: [id])
+  favorite FavoritePokemon @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
   type     PokemonType @relation(fields: [typeId], references: [id])
 
   @@id([favoriteId, typeId])

@@ -27,9 +27,11 @@ export default class PokemonController{
         return res.status(200).json(result);
     }
 
-    @Get("/favorites/:userExternalId")
-    public async getFavoritePokemons(@Res() res: any, @Param("userExternalId") userExternalId: string): Promise<any>{
+    @Get("/favorite/:userExternalId")
+    public async getAllFavoritePokemons(@Res() res: any, @Param("userExternalId") userExternalId: string): Promise<any>{
+        const result = await this.pokemonService.getAllFavoritePokemons(userExternalId);
 
+        return res.status(200).json(result);
     }
 
     @Post("/favorite/:userExternalId/:pokemonApiId")
@@ -41,7 +43,9 @@ export default class PokemonController{
 
     @Delete("/favorite/:userExternalId/:pokemonId")
     public async deleteFavoritePokemon(@Res() res: any, @Param("userExternalId") userExternalId: string, @Param("pokemonId") pokemonId: number): Promise<any>{
+        await this.pokemonService.deleteFavoritePokemon(userExternalId, pokemonId);
 
+        return res.status(204).send();
     }
 
 }

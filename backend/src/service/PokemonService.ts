@@ -12,7 +12,6 @@ const pokeApi = axios.create({
 });
 
 export default class PokemonService{
-
     private userRepository: UserRepository = new UserRepository();
     private favoriteRepository: FavoriteRepository = new FavoriteRepository();
 
@@ -116,6 +115,31 @@ export default class PokemonService{
         if(!user) throw new NotFoundError("User not found");
 
         this.favoriteRepository.createFavorite(user.id, pokemon.data);
+    }
+
+    public async getAllFavoritePokemons(userExternalId: string): Promise<any>{
+        const user: any = await this.userRepository.findByExternalId(userExternalId);
+
+        if(!user) throw new NotFoundError("User not found");
+
+        const dtoList: PokemonResponseDTO[] = user.favorites.map((favorite: any) => ({
+            pokemonId: favorite.pokemonApiId,
+            name: favorite.name,
+            types: favorite.types.map((typeInfo: any) => typeInfo.type.name),
+            imageUrl: favorite.image
+        }));
+
+        return dtoList;
+    }
+
+    public async deleteFavoritePokemon(userExternalId: string, pokemonId: number): Promise<void> {
+        //Deletar o favorito
+        //ERror caso o pokemon não esteja entre os favoritos do usuário
+        const user: any = await this.userRepository.findByExternalId(userExternalId);
+
+        if(!user) throw new NotFoundError("User not found");
+
+        await this.favoriteRepository.deleteFavorite(user.id, Number(pokemonId));
     }
 
 }

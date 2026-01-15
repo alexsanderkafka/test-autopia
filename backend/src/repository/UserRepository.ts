@@ -20,7 +20,17 @@ export default class UserRepository{
     public async findByExternalId(userExternalId: string){
         return await prisma.user.findUnique({
             where: { externalId: userExternalId },
-            include: { favorites: true }
+            include: { 
+                favorites: {
+                    include: {
+                        types: {
+                            include: {
+                                type: true
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 
