@@ -28,6 +28,7 @@ model FavoritePokemon {
   pokemonApiId Int
   name String
   types FavoriteType[]
+  stats PokemonFavoriteStat[]
 
   image  String
 
@@ -35,11 +36,29 @@ model FavoritePokemon {
   @@unique([userId, pokemonApiId])
 }
 
+model PokemonStat {
+  id        Int   @id @default(autoincrement())
+  name      String 
+  value     Int
+
+  favorites PokemonFavoriteStat[]
+}
+
 model PokemonType {
   id        Int   @id @default(autoincrement())
   name      String 
 
   favorites FavoriteType[]
+}
+
+model PokemonFavoriteStat {
+  favoriteId Int
+  statId     Int
+
+  favorite FavoritePokemon @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
+  stat     PokemonStat @relation(fields: [statId], references: [id])
+
+  @@id([favoriteId, statId])
 }
 
 model FavoriteType {

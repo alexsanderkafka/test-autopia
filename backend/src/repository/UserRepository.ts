@@ -27,9 +27,15 @@ export default class UserRepository{
                             include: {
                                 type: true
                             }
+                        },
+                        stats: {
+                            include: {
+                                stat: true
+                            }
                         }
                     }
-                }
+                },
+
             }
         });
     }

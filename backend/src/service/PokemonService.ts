@@ -30,7 +30,11 @@ export default class PokemonService{
                     pokemonId: details.data.id,
                     name: details.data.name,
                     types: details.data.types.map((typeInfo: any) => typeInfo.type.name),
-                    imageUrl: details.data.sprites.front_default
+                    imageUrl: details.data.sprites.front_default,
+                    stats: details.data.stats.map((stat: any) => ({
+                        name: stat.stat.name,
+                        value: stat.base_stat
+                    }))
                 }
             })
         );
@@ -60,7 +64,11 @@ export default class PokemonService{
             pokemonId: currentPokemon.data.id,
             name: currentPokemon.data.name,
             types: currentPokemon.data.types.map((typeInfo: any) => typeInfo.type.name),
-            imageUrl: currentPokemon.data.sprites.front_default
+            imageUrl: currentPokemon.data.sprites.front_default,
+            stats: currentPokemon.data.stats.map((stat: any) => ({
+                name: stat.stat.name,
+                value: stat.base_stat
+            }))
         }
 
         return dto;
@@ -80,11 +88,17 @@ export default class PokemonService{
             paginatedPokemons.map(async (data: any) => {
                 const details: any = await pokeApi.get(data.pokemon.url);
 
+                console.log(details.data.stats);
+
                 return {
                     pokemonId: details.data.id,
                     name: details.data.name,
                     types: details.data.types.map((typeInfo: any) => typeInfo.type.name),
-                    imageUrl: details.data.sprites.front_default
+                    imageUrl: details.data.sprites.front_default,
+                    stats: details.data.stats.map((stat: any) => ({
+                        name: stat.stat.name,
+                        value: stat.base_stat
+                    }))
                 }
             })
         );
@@ -121,12 +135,16 @@ export default class PokemonService{
         const user: any = await this.userRepository.findByExternalId(userExternalId);
 
         if(!user) throw new NotFoundError("User not found");
-
+        
         const dtoList: PokemonResponseDTO[] = user.favorites.map((favorite: any) => ({
             pokemonId: favorite.pokemonApiId,
             name: favorite.name,
             types: favorite.types.map((typeInfo: any) => typeInfo.type.name),
-            imageUrl: favorite.image
+            imageUrl: favorite.image,
+            stats: favorite.stats.map((stat: any) => ({
+                name: stat.stat.name,
+                value: stat.stat.value
+            }))
         }));
 
         return dtoList;

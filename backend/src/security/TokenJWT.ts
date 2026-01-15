@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import TokenJWTError from '../err/TokenJWTError';
 
 export default abstract class TokenJWT {
 
@@ -16,9 +17,12 @@ export default abstract class TokenJWT {
 
     public static verifyToken(token: string, endpoint: string){
         jwt.verify(token, this.mySecretKey, (err, decoded) => {
+
+            console.log(decoded);
+
             if(err){
-                console.log("Token is not valid.");
-                //throw new TokenJwtError("Token is invalid.", endpoint);
+                console.log("Token is invalid."); 
+                throw new TokenJWTError("Token is invalid.");
             }else{
                 console.log("Token is valid.");
                 return;

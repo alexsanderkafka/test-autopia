@@ -9,7 +9,7 @@ export default class PokemonController{
 
     @Get("/all")
     @UseBefore(SecurityFilter)
-    public async all(@Res() res: any, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 10): Promise<any>{
+    public async all(@Res() res: any, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 20): Promise<any>{
         const result = await this.pokemonService.getAllPokemon(page, limit);
 
         return res.status(200).json(result);
@@ -25,7 +25,7 @@ export default class PokemonController{
 
     @Get("/filter/:type")
     @UseBefore(SecurityFilter)
-    public async getAllPokemonByType(@Res() res: any, @Param("type") type: string, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 10): Promise<any>{
+    public async getAllPokemonByType(@Res() res: any, @Param("type") type: string, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 20): Promise<any>{
         const result = await this.pokemonService.getAllPokemonByType(type, page, limit);
 
         return res.status(200).json(result);

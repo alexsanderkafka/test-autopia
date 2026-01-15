@@ -4,4 +4,5 @@ export default interface PokemonResponseDTO{
     name: string;
     types: string[];
     imageUrl: string;
+    stats: any[];
 }

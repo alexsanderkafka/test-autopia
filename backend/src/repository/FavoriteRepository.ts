@@ -1,3 +1,4 @@
+import { create } from "node:domain";
 import prisma from "../db/prisma";
 import type PokemonRequestDTO from "../dto/PokemonRequestDTO";
 
@@ -16,6 +17,16 @@ export default class FavoriteRepository{
                         type: {  
                             create: {
                                 name: typeInfo.type.name
+                            }
+                        }
+                    }))
+                },
+                stats: {
+                    create: pokemon.stats.map((statsInfo: any) => ({
+                        stat: {
+                            create: {
+                                name: statsInfo.stat.name,
+                                value: statsInfo.base_stat
                             }
                         }
                     }))

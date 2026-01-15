@@ -1,17 +1,16 @@
 import { Heart, X } from "lucide-react";
 
+export interface Stat{
+    name: string,
+    value: number
+}
+
 export interface Pokemon {
-  id: number;
-  name: string;
-  types: string[];
-  image: string;
-  stats: {
-    hp: number;
-    attack: number;
-    defense: number;
-    speed: number;
-  };
-  description: string;
+    pokemonId: number;
+    name: string;
+    types: string[];
+    imageUrl: string;
+    stats: Stat[];
 }
 
 interface PokemonDetailsModalProps {
@@ -48,7 +47,7 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
                     <div className="flex justify-between items-start mb-6">
                         <div>
                             <span className="text-sm text-[#0f380f] pixel-font">
-                                #{props.pokemon.id.toString().padStart(3, "0")}
+                                #{props.pokemon.pokemonId.toString().padStart(3, "0")}
                             </span>
                             <h2 className="text-2xl text-[#0f380f] pixel-font mt-1">
                                 {props.pokemon.name.toUpperCase()}
@@ -73,7 +72,7 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="bg-[#8bac0f] border-4 border-[#0f380f] rounded-lg p-6 flex items-center justify-center">
-                            <img src={props.pokemon.image} alt={props.pokemon.name}
+                            <img src={props.pokemon.imageUrl} alt={props.pokemon.name}
                             className="w-full max-w-[300px] h-auto pixelated"
                             />
                         </div>
@@ -103,17 +102,17 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
                                 </h3>
 
                                 <div className="space-y-2">
-                                    {Object.entries(props.pokemon.stats).map(([statName, statValue]: [string, number]) => (
-                                        <div key={statName}>
+                                    {Object.entries(props.pokemon.stats).map((stat: any) => (
+                                        <div key={stat.name}>
                                             <div className="flex justify-between text-xs pixel-font text-[#0f380f] mb-1">
-                                                <span>{statName.toUpperCase()}</span>
-                                                <span>{statValue}</span>
+                                                <span>{stat.name.toUpperCase()}</span>
+                                                <span>{stat.value}</span>
                                             </div>
                                             <div className="bg-[#306230] border-2 border-[#0f380f] rounded-full h-4 overflow-hidden">
                                                 <div
                                                 className="bg-[#0f380f] h-full transition-all"
                                                 style={{
-                                                  width: `${(statValue / 160) * 100}%`,
+                                                  width: `${(stat.value / 160) * 100}%`,
                                                 }}
                                             ></div>
                                             </div>
@@ -129,7 +128,7 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
                             DESCRIÇÃO
                         </h3>
                         <p className="text-[10px] text-[#0f380f] pixel-font leading-relaxed">
-                            {props.pokemon.description}
+                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Natus veniam ratione dolorem illo vitae! Perferendis iusto dolorem amet totam, mollitia ea sequi autem similique nobis, tenetur sit eligendi fugiat explicabo.
                         </p>
                     </div>
                 </div>
