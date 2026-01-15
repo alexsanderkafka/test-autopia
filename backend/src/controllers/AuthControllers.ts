@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { Body, Get, JsonController, Post, Res } from "routing-controllers";
+import { Body, Get, JsonController, Post, Res, UseBefore } from "routing-controllers";
 import type UserRequestDTO from "../dto/UserRequestDTO";
 import AuthService from "../service/AuthService";
 

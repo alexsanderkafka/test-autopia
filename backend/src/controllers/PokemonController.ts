@@ -1,5 +1,6 @@
-import { Delete, Get, JsonController, Param, Post, QueryParam, QueryParams, Res } from "routing-controllers";
+import { Delete, Get, JsonController, Param, Post, QueryParam, QueryParams, Res, UseBefore } from "routing-controllers";
 import PokemonService from "../service/PokemonService";
+import SecurityFilter from "../middlewares/SecurityFilter";
 
 @JsonController("/pokemon")
 export default class PokemonController{
@@ -7,6 +8,7 @@ export default class PokemonController{
     private pokemonService: PokemonService = new PokemonService();
 
     @Get("/all")
+    @UseBefore(SecurityFilter)
     public async all(@Res() res: any, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 10): Promise<any>{
         const result = await this.pokemonService.getAllPokemon(page, limit);
 
@@ -14,6 +16,7 @@ export default class PokemonController{
     }
 
     @Get("/:search")
+    @UseBefore(SecurityFilter)
     public async searchByIdOrName(@Res() res: any, @Param("search") search: string): Promise<any>{
         const result = await this.pokemonService.searchPokemon(search);
 
@@ -21,6 +24,7 @@ export default class PokemonController{
     }
 
     @Get("/filter/:type")
+    @UseBefore(SecurityFilter)
     public async getAllPokemonByType(@Res() res: any, @Param("type") type: string, @QueryParam("page", {required: false}) page: number = 1, @QueryParam("limit", {required: false}) limit: number = 10): Promise<any>{
         const result = await this.pokemonService.getAllPokemonByType(type, page, limit);
 
@@ -28,6 +32,7 @@ export default class PokemonController{
     }
 
     @Get("/favorite/:userExternalId")
+    @UseBefore(SecurityFilter)
     public async getAllFavoritePokemons(@Res() res: any, @Param("userExternalId") userExternalId: string): Promise<any>{
         const result = await this.pokemonService.getAllFavoritePokemons(userExternalId);
 
@@ -35,6 +40,7 @@ export default class PokemonController{
     }
 
     @Post("/favorite/:userExternalId/:pokemonApiId")
+    @UseBefore(SecurityFilter)
     public async addFavoritePokemon(@Res() res: any, @Param("userExternalId") userExternalId: string, @Param("pokemonApiId") pokemonApiId: number): Promise<any>{
         await this.pokemonService.addFavoritePokemon(userExternalId, pokemonApiId);
 
@@ -42,6 +48,7 @@ export default class PokemonController{
     }
 
     @Delete("/favorite/:userExternalId/:pokemonId")
+    @UseBefore(SecurityFilter)
     public async deleteFavoritePokemon(@Res() res: any, @Param("userExternalId") userExternalId: string, @Param("pokemonId") pokemonId: number): Promise<any>{
         await this.pokemonService.deleteFavoritePokemon(userExternalId, pokemonId);
 
