@@ -1,11 +1,56 @@
 import { useState } from "react";
+import { pokemonApi } from "../api";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
 
   const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [fieldError, setFieldError] = useState<any>({});
+  //const [loading, setLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string>("");
+
+  const navigate = useNavigate();
+
 
   function onLogin(){
-    //Logica de login ou criação de conta
+    if(!validateFields()) return;
+
+    const data: Record<string, string> = {
+      email,
+      password
+    }
+
+    pokemonApi.post("auth/login", data).then((response: any) => {
+      const tokenJwt: string = response.data.accessToken;
+
+      localStorage.setItem("token", tokenJwt);
+
+      navigate("/home");
+    }).catch((error: any) => {
+      if(error.response.status === 404) setApiError(error.response.data.message);
+
+      if(error.response.status === 401) setApiError(error.response.data.message);
+    });
+  }
+
+  function validateFields(){
+    let newErrors: any = {};
+
+    if(!email || email === ""){
+      newErrors.email = "Email é obrigatório";
+    } else if (!email.includes("@")) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!password || password === "") {
+      newErrors.password = "Senha é obrigatória";
+    }
+
+    setFieldError(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   }
 
   return (
@@ -18,19 +63,32 @@ function Login() {
                 POKÉDEX
               </h1>
 
+              {apiError && <span className="pixel-font text-xs text-[#ff0808] text-center block mb-2">{apiError}</span>}
+
               <div className="space-y-4">
                 <div>
                   <label className="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-[#9bbc0f] pixel-font">{isLogin ? "USUÁRIO" : "CRIAR USUÁRIO"}</label>
                   <input className="w-full bg-[#306230] text-[#9bbc0f] p-2 border-2 border-[#0f380f] rounded-lg pixel-font" 
                   placeholder="seu@email.com"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{
+                    borderColor: fieldError.email && "#ff0808"
+                  }}
                   />
+                  {fieldError.email && <span className="pixel-font text-xs text-[#ff0808]">{fieldError.email}</span>}
                 </div>
 
                 <div>
                   <label className="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-[#9bbc0f] pixel-font">SENHA</label>
                   <input className="w-full bg-[#306230] text-[#9bbc0f] p-2 border-2 border-[#0f380f] rounded-lg pixel-font" 
                   placeholder="senha"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   />
+                  {fieldError.password && <span className="pixel-font text-xs text-[#ff0808]">{fieldError.password}</span>}
                 </div>
               </div>
 

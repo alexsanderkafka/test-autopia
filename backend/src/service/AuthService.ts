@@ -14,13 +14,13 @@ export default class AuthService{
         const user: any = await this.userRepository.findUserByEmail(dto.email);
 
         if(!user){
-            throw new NotFoundEntityError("User not found");
+            throw new NotFoundEntityError("Usuário não encontrado");
         }
 
         const isPasswordValid = await PasswordEncoder.comparePassword(dto.password, user.password);
 
         if(!isPasswordValid){
-            throw new InvalidPasswordError("Invalid password");
+            throw new InvalidPasswordError("Senha inválida");
         }
 
         const jwt = TokenJWT.generateToken(user.email);
