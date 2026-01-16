@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export const pokemonApi: any = axios.create({
-    baseURL: "http://localhost:8080/api/",
+    baseURL: "https://backend-autumn-sun-2532.fly.dev/api/",
 });
