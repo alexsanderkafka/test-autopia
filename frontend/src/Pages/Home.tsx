@@ -1,45 +1,36 @@
-import { Search, Filter, Heart, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, Heart, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useEffect} from "react";
 import PokemonDetailsModal from "../components/PokemonDetailsModal";
 import { pokemonApi } from "../api";
-import { Blocks, RotatingLines } from "react-loader-spinner";
-
-export interface Stat{
-    name: string,
-    value: number
-}
-
-export interface Pokemon {
-    pokemonId: number;
-    name: string;
-    types: string[];
-    imageUrl: string;
-    stats: Stat[];
-    isFavorite: boolean;
-}
+import { RotatingLines } from "react-loader-spinner";
+import { useNavigate } from "react-router-dom";
+import { typeColors, types, type Pokemon } from "../types/PokemonType";
+import { usePokemon } from "../store/PokemonContext";
 
 function Home(){
 
     const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-
-    const [pokemons, setPokemons] = useState<Pokemon[] | null >(null);
+    const { pokemons, setPokemons } = usePokemon();
     const [token, setToken] = useState<string>("");
-    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPage, setTotalPage] = useState<number>(0);
+
     const [loading, setLoading] = useState<boolean>(true);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<string>("all")
-    
 
+    const [isfavorite, setIsFavorite] = useState<boolean>(false);
+
+    const navigate = useNavigate();
+    
     useEffect(() => {
         const tokenJwt: string = localStorage.getItem("token") || "";
-        findAllPokemons(currentPage + 1);
+        findAllPokemons(currentPage);
         setToken(tokenJwt);
     }, []);
 
     function navigationPage(page: number){
-
         if(filter !== "all"){
             filterAllPokemon(page, filter);
         }else{
@@ -53,13 +44,9 @@ function Home(){
                 Authorization: `Bearer ${token}`
             }
         }).then((response: any) => {
-            console.log("dentro do filter")
-            console.log(response.data.data);
             setPokemons(response.data.data);    
             setCurrentPage(response.data.page);
             setTotalPage(response.data.totalPages);
-        }).catch((error: any) => {
-            console.log(error);
         });
     }
 
@@ -70,17 +57,13 @@ function Home(){
                 Authorization: `Bearer ${token}`
             }
         }).then((response: any) => {
-            console.log(response.data.data);
             setPokemons(response.data.data);
             setCurrentPage(response.data.page);
             setTotalPage(response.data.totalPages);
             setLoading(false);
-        }).catch((error: any) => {
-            console.log(error);
         });
     }
 
-    
     function handlerSearch(){
         console.log(search);
 
@@ -92,55 +75,35 @@ function Home(){
             console.log(response.data);
 
             setPokemons(Array.isArray(response.data) ? response.data : [response.data]);
-            setCurrentPage(0);
+            setCurrentPage(1);
             setTotalPage(0);
-        }).catch((error: any) => {
-            console.log(error);
         });
     }
 
-    const typeColors: Record<string, string> = {
-        normal: "#A8A878",
-        fire: "#F08030",
-        water: "#6890F0",
-        electric: "#F8D030",
-        grass: "#78C850",
-        ice: "#98D8D8",
-        fighting: "#C03028",
-        poison: "#A040A0",
-        ground: "#E0C068",
-        flying: "#A890F0",
-        psychic: "#F85888",
-        bug: "#A8B820",
-        rock: "#B8A038",
-        ghost: "#705898",
-        dragon: "#7038F8",
-        dark: "#705848",
-        steel: "#B8B8D0",
-        fairy: "#EE99AC"
-    };
+    function getAllFavorites(){
+        const userExternalId: string = localStorage.getItem("userExternalId") || "";
 
-    const types: string[] = [
-        "all",
-        "normal",
-        "fire",
-        "water",
-        "electric",
-        "grass",
-        "ice",
-        "fighting",
-        "poison",
-        "ground",
-        "flying",
-        "psychic",
-        "bug",
-        "rock",
-        "ghost",
-        "dragon",
-        "dark",
-        "steel",
-        "fairy"
-    ]
+        setLoading(true);
+
+        pokemonApi.get(`pokemon/favorite/${userExternalId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then((response: any) => {
+            console.log(response.data);
+            setPokemons(response.data);
+            setCurrentPage(1);
+            setTotalPage(0);
+            setLoading(false);
+        });
+    }
+
+    function logout(){
+        localStorage.removeItem("token");
+        localStorage.removeItem("userExternalId");
+
+        navigate("/");
+    }
 
     return(
         <div className="min-h-screen bg-[#9bbc0f]">
@@ -149,13 +112,23 @@ function Home(){
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="pixel-font text-3xl text-[#0f380f]">POKÉDEX</h1>
                         <div className="flex gap-2">
-                            <button onClick={() => {}}
+                            <button onClick={() => {
+                                setIsFavorite(!isfavorite);
+
+                                if(!isfavorite) {
+                                    findAllPokemons(currentPage);
+                                    return;
+                                }
+                                
+                                getAllFavorites();
+                                
+                            }}
                             className="flex bg-[#306230] text-[#9bbc0f] pixel-font text-xs border-4 rounded-lg border-[#0f380f] px-4 py-2 hover:bg-[#051305] transition-colors duration-300">
                                 <Heart className="h-4 w-4 mr-2" />
-                                FAVORITOS (2)
+                                FAVORITOS
                             </button>
 
-                            <button onClick={() => {}}
+                            <button onClick={logout}
                             className="flex px-4 py-2 pixel-font text-xs text-white border-4 rounded-lg border-[#0f380f] bg-[#A040A0] hover:bg-[#8030A0] transition-colors duration-300">
                                 <LogOut className="h-4 w-4 mr-2" />
                                 SAIR
@@ -253,7 +226,7 @@ function Home(){
                         ))
                     }
                 </div> :
-                <div>
+                <div className="w-full flex items-center justify-center">
                     <RotatingLines
                     visible={true}
                     height="96"
@@ -278,12 +251,12 @@ function Home(){
             )}
 
             {
-                totalPage > 1 &&
+                totalPage > 1 && !loading && 
                 <div className="container mx-auto px-4 py-4 flex justify-center">
                     <div className="flex items-center gap-4">
                         <button
                         onClick={() => {
-                            if(currentPage > 0){
+                            if(currentPage > 1){
                                 navigationPage(currentPage - 1);
                             }
                         }}

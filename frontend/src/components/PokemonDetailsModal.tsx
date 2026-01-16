@@ -1,20 +1,7 @@
-import { Heart, X } from "lucide-react";
+import { Heart, HeartCrack, X } from "lucide-react";
 import { pokemonApi } from "../api";
-import { useEffect, useState } from "react";
-
-export interface Stat{
-    name: string,
-    value: number
-}
-
-export interface Pokemon {
-    pokemonId: number;
-    name: string;
-    types: string[];
-    imageUrl: string;
-    stats: Stat[];
-    isFavorite: boolean;
-}
+import { typeColors, type Pokemon } from "../types/PokemonType";
+import { usePokemon } from "../store/PokemonContext";
 
 interface PokemonDetailsModalProps {
     pokemon: Pokemon;
@@ -24,26 +11,7 @@ interface PokemonDetailsModalProps {
 
 function PokemonDetailsModal(props: PokemonDetailsModalProps) {
 
-    const typeColors: Record<string, string> = {
-        normal: "#A8A878",
-        fire: "#F08030",
-        water: "#6890F0",
-        electric: "#F8D030",
-        grass: "#78C850",
-        ice: "#98D8D8",
-        fighting: "#C03028",
-        poison: "#A040A0",
-        ground: "#E0C068",
-        flying: "#A890F0",
-        psychic: "#F85888",
-        bug: "#A8B820",
-        rock: "#B8A038",
-        ghost: "#705898",
-        dragon: "#7038F8",
-        dark: "#705848",
-        steel: "#B8B8D0",
-        fairy: "#EE99AC"
-    };
+    const { removePokemon } = usePokemon();
 
     function addNewFavorite(){
         const userExternalId: string = localStorage.getItem("userExternalId") || "";
@@ -53,7 +21,24 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
                 Authorization: `Bearer ${props.tokenJwt}`
             }
         }).then((response: any) => {
-            console.log(response.data);
+            console.log(response);
+        }).catch((error: any) => {
+            console.log(error);
+        });
+    }
+
+    function removeFavorite(){
+        const userExternalId: string = localStorage.getItem("userExternalId") || "";
+
+        pokemonApi.delete(`pokemon/favorite/${userExternalId}/${props.pokemon.pokemonId}`, {
+            headers: {
+                Authorization: `Bearer ${props.tokenJwt}`
+            }
+        }).then((response: any) => {
+            if(response.status === 204){
+                removePokemon(props.pokemon.pokemonId);
+                props.onClose();
+            }
         }).catch((error: any) => {
             console.log(error);
         });
@@ -78,15 +63,23 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
                         <div className="flex gap-2">
                             <button
                             onClick={() => {
-                                addNewFavorite();
+                                if(!props.pokemon.isFavorite){
+                                    addNewFavorite();
+                                }else{
+                                    removeFavorite();
+                                }
+                                
                             }}
                             className="hover:bg-[#8bac0f] rounded-full p-1 transition-colors duration-300"
                             >
-                                <Heart className="h-5 w-5 text-[#0f380f] pixel-font m-2"
-                                style={{
-                                    color: props.pokemon.isFavorite ? "#ff0000" : "#0f380f"
-                                }}
-                                />
+                                {
+                                    !props.pokemon.isFavorite ? 
+                                    <Heart className="h-5 w-5 text-[#0f380f] pixel-font m-2" /> 
+                                    : 
+                                    <HeartCrack className="h-5 w-5 text-[#ff0000] pixel-font m-2" />
+                                }
+                                
+                                
                             </button>
                             <button
                             onClick={props.onClose}

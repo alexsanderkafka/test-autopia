@@ -8,7 +8,6 @@ function Login() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [fieldError, setFieldError] = useState<any>({});
-  //const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>("");
 
   const navigate = useNavigate();
@@ -34,6 +33,27 @@ function Login() {
       if(error.response.status === 404) setApiError(error.response.data.message);
 
       if(error.response.status === 401) setApiError(error.response.data.message);
+    });
+  }
+
+  function onRegister(){
+    if(!validateFields()) return;
+
+    const data: Record<string, string> = {
+      email,
+      password
+    }
+
+    pokemonApi.post("auth/register", data).then((response: any) => {
+      const tokenJwt: string = response.data.accessToken;
+      const userExternalId: string = response.data.userExternalId;
+
+      localStorage.setItem("token", tokenJwt);
+      localStorage.setItem("userExternalId", userExternalId);
+
+      navigate("/home");
+    }).catch((error: any) => {
+      if(error.response.status === 409) setApiError(error.response.data.message);
     });
   }
 
@@ -95,8 +115,14 @@ function Login() {
               </div>
 
               <button
-                onClick={onLogin}
-                className="my-2 w-full bg-[#306230] hover:bg-[#0f380f] transition-colors duration-300 text-[#9bbc0f] border-4 border-[#0f380f] rounded-lg py-6 pixel-font text-lg shadow-[4px_4px_0px_0px_rgba(15,56,15,0.5)]"
+                onClick={() => {
+                  if(isLogin){
+                    onLogin();
+                  }else{
+                    onRegister();
+                  }
+                }}
+                className="my-2 w-full bg-[#233323] hover:bg-[#0f380f] transition-colors duration-300 text-[#9bbc0f] border-4 border-[#0f380f] rounded-lg py-6 pixel-font text-lg shadow-[4px_4px_0px_0px_rgba(15,56,15,0.5)]"
               >
                 {isLogin ? "▶ ENTRAR" : "▶ CRIAR CONTA"}
               </button>

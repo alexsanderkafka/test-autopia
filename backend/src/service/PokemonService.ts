@@ -18,8 +18,6 @@ export default class PokemonService{
     public async getAllPokemon(page: number, limit: number): Promise<any>{
         const offset: number = (page - 1) * limit;
 
-        //Tratamento de erros
-
         const response: any = await pokeApi.get(`pokemon?offset=${offset}&limit=${limit}`);
 
         const dtoList: PokemonResponseDTO[] = await Promise.all(
@@ -57,8 +55,6 @@ export default class PokemonService{
     }
 
     public async searchPokemon(search: string): Promise<PokemonResponseDTO>{
-        //Tratamento de erros
-
         const currentPokemon: any = await pokeApi.get(`pokemon/${search.toLowerCase()}`);
 
         const dto: PokemonResponseDTO = {
@@ -122,16 +118,18 @@ export default class PokemonService{
     }
 
     public async addFavoritePokemon(userExternalId: string, pokemonApiId: number){
-        //Verificar se o pokemonApiId é valido, realmente existe na 
-        //Voltar o error caso já exista o favorito para o usuário
-
         const pokemon: any = await pokeApi.get(`pokemon/${pokemonApiId}`);
 
         const user: any = await this.userRepository.findByExternalId(userExternalId);
 
         if(!user) throw new NotFoundError("User not found");
+            
+        try{
+            await this.favoriteRepository.createFavorite(user.id, pokemon.data);
+        }catch(err: any){
+            if(err.code === "P2002") throw new ExistingEntityError("Esse pokemon já está entre seus favoritos");
+        }
 
-        this.favoriteRepository.createFavorite(user.id, pokemon.data);
     }
 
     public async getAllFavoritePokemons(userExternalId: string): Promise<any>{
@@ -140,7 +138,7 @@ export default class PokemonService{
         if(!user) throw new NotFoundError("User not found");
         
         const dtoList: PokemonResponseDTO[] = user.favorites.map((favorite: any) => ({
-            pokemonId: favorite.pokemonApiId,
+            pokemonId: favorite.id,
             name: favorite.name,
             types: favorite.types.map((typeInfo: any) => typeInfo.type.name),
             imageUrl: favorite.image,
@@ -148,7 +146,7 @@ export default class PokemonService{
                 name: stat.stat.name,
                 value: stat.stat.value
             })),
-            isFavorite: false
+            isFavorite: true
         }));
 
         return dtoList;
@@ -161,7 +159,17 @@ export default class PokemonService{
 
         if(!user) throw new NotFoundError("User not found");
 
-        await this.favoriteRepository.deleteFavorite(user.id, Number(pokemonId));
+        //const favorite: any = await this.favoriteRepository.findFavorite(pokemonId);
+
+        //if(!favorite) throw new NotFoundError("Favorite not found");
+
+        try{
+            await this.favoriteRepository.deleteFavorite(user.id, Number(pokemonId));
+        }catch(err: any){
+            if(err.code === "P2025") throw new NotFoundError("Esse pokemon não está entre seus favoritos");
+        }
+
+        
     }
 
 }

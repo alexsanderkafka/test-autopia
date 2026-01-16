@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router";
-import Login from "../Pages/Login.tsx";
-import Home from "../Pages/Home.tsx";
+import Login from "../pages/Login.tsx";
+import Home from "../pages/Home.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
 import PublicRoute from "./PublicRoute.tsx";
 

@@ -9,7 +9,7 @@ export default class UserRepository{
     }
 
     public async createUser(dto: UserRequestDTO){
-        await prisma.user.create({
+        return await prisma.user.create({
             data: {
                 email: dto.email,
                 password: dto.password

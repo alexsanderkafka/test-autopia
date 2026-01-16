@@ -43,4 +43,12 @@ export default class FavoriteRepository{
             }
         });
     }
+
+    public async findFavorite(pokemonId: number){
+        return await prisma.favoritePokemon.findUnique({
+            where: {
+                id: pokemonId
+            }
+        });
+    }
 }

@@ -18,8 +18,8 @@ export default class AuthControllers{
 
     @Post("/register")
     public async register(@Body({validate: false}) body: UserRequestDTO, @Res() res: any): Promise<any>{
-        await this.authService.register(body);
+        const result = await this.authService.register(body);
 
-        return res.status(201).json({message: "User registered successfully"});
+        return res.status(201).json(result);
     }
 }

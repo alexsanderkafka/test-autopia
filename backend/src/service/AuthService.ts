@@ -37,15 +37,28 @@ export default class AuthService{
         return tokenDto;
     }
 
-    public async register(body: UserRequestDTO): Promise<void>{
+    public async register(body: UserRequestDTO): Promise<TokenResponseDTO>{
         const user: any = await this.userRepository.findUserByEmail(body.email);
 
         if(user){
-            throw new ExistingEntityError("User already exists");
+            throw new ExistingEntityError("Usuário já cadastrado");
         }
 
         body.password = await PasswordEncoder.encode(body.password);
 
-        this.userRepository.createUser(body);
+        const newUser: any = await this.userRepository.createUser(body);
+
+        const jwt = TokenJWT.generateToken(newUser.email);
+        const refreshToken = TokenJWT.generateRefreshToken(newUser.email);
+
+        const dto: TokenResponseDTO = {
+            userExternalId: newUser.externalId,
+            email: newUser.email,
+            authenticated: true,
+            accessToken: jwt,
+            refreshToken: refreshToken
+        }
+
+        return dto;
     }
 }
