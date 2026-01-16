@@ -11,7 +11,6 @@ function Home(){
 
     const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
     const { pokemons, setPokemons } = usePokemon();
-    const [token, setToken] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPage, setTotalPage] = useState<number>(0);
 
@@ -25,9 +24,7 @@ function Home(){
     const navigate = useNavigate();
     
     useEffect(() => {
-        const tokenJwt: string = localStorage.getItem("token") || "";
         findAllPokemons(currentPage);
-        setToken(tokenJwt);
     }, []);
 
     function navigationPage(page: number){
@@ -39,9 +36,11 @@ function Home(){
     }
 
     function filterAllPokemon(page: number, type: string){
+        const tokenJwt: string = localStorage.getItem("token") || "";
+
         pokemonApi.get(`pokemon/filter/${type}?page=${page}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             setPokemons(response.data.data);    
@@ -51,10 +50,11 @@ function Home(){
     }
 
     function findAllPokemons(page: number){
-        console.log(2);
+        const tokenJwt: string = localStorage.getItem("token") || "";
+        
         pokemonApi.get(`pokemon/all?page=${page}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             setPokemons(response.data.data);
@@ -65,11 +65,11 @@ function Home(){
     }
 
     function handlerSearch(){
-        console.log(search);
+        const tokenJwt: string = localStorage.getItem("token") || "";
 
         pokemonApi.get(`pokemon/${search}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             console.log(response.data);
@@ -81,13 +81,15 @@ function Home(){
     }
 
     function getAllFavorites(){
+        const tokenJwt: string = localStorage.getItem("token") || "";
+
         const userExternalId: string = localStorage.getItem("userExternalId") || "";
 
         setLoading(true);
 
         pokemonApi.get(`pokemon/favorite/${userExternalId}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             console.log(response.data);
@@ -246,7 +248,6 @@ function Home(){
                 <PokemonDetailsModal
                 pokemon={selectedPokemon}
                 onClose={() => setSelectedPokemon(null)}
-                tokenJwt={token}
                 />
             )}
 

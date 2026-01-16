@@ -6,7 +6,6 @@ import { usePokemon } from "../store/PokemonContext";
 interface PokemonDetailsModalProps {
     pokemon: Pokemon;
     onClose: () => void;
-    tokenJwt: string;
 }
 
 function PokemonDetailsModal(props: PokemonDetailsModalProps) {
@@ -14,11 +13,12 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
     const { removePokemon } = usePokemon();
 
     function addNewFavorite(){
+        const tokenJwt: string = localStorage.getItem("token") || "";
         const userExternalId: string = localStorage.getItem("userExternalId") || "";
 
         pokemonApi.post(`pokemon/favorite/${userExternalId}/${props.pokemon.pokemonId}`, null, {
             headers: {
-                Authorization: `Bearer ${props.tokenJwt}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             console.log(response);
@@ -28,11 +28,12 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
     }
 
     function removeFavorite(){
+        const tokenJwt: string = localStorage.getItem("token") || "";
         const userExternalId: string = localStorage.getItem("userExternalId") || "";
 
         pokemonApi.delete(`pokemon/favorite/${userExternalId}/${props.pokemon.pokemonId}`, {
             headers: {
-                Authorization: `Bearer ${props.tokenJwt}`
+                Authorization: `Bearer ${tokenJwt}`
             }
         }).then((response: any) => {
             if(response.status === 204){
@@ -43,8 +44,6 @@ function PokemonDetailsModal(props: PokemonDetailsModalProps) {
             console.log(error);
         });
     }
-
-    console.log(props.pokemon.stats)
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">

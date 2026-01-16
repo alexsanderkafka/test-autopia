@@ -11,6 +11,8 @@ export default class SecurityFilter implements ExpressMiddlewareInterface{
 
         const jwt: string = tokenHeader.split(" ")[1];
 
+        if(!jwt) return response.status(401).json({ message: "Token not found"});
+
         try{
             TokenJWT.verifyToken(jwt, request.route.path);
         }catch(err){
@@ -20,7 +22,6 @@ export default class SecurityFilter implements ExpressMiddlewareInterface{
         }
 
         next();
-
     }
 
 }
