@@ -32,3 +32,13 @@ dist-ssr/
 generated/
 migration/
 migrations/
+
+#deploy
+Dockerfile
+Dockerfile/
+fly.toml
+fly.toml/
+.dockerignore
+.dockerignore/
+
+.vercel/
